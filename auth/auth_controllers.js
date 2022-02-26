@@ -5,12 +5,20 @@ const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 var jwt = require("jsonwebtoken");
 var expressJwt = require("express-jwt");
-
+const { isError } = require('util');
 
 
 exports.superAdminLogin = (req, res) => {
-    const { user_email, password } = req.body;
+    Pig.box("SuperAdmin - LOGIN");
+    console.log(req.body)
+    const user_email = req.body.email;
+    const password = req.body.password;
     const errors = validationResult(req);
+    if (!req.body.password || req.body.password === '') {
+        return res.status(422).json({
+            error: "Please enter the password"
+        });
+    }
     if (!errors.isEmpty()) {
         return res.status(422).json({
             error: errors.array()[0].msg
@@ -19,60 +27,86 @@ exports.superAdminLogin = (req, res) => {
 
     SuperAdminProfile.findOne({ user_email: user_email }, (err, user) => {
         if (err || !user) {
-            return res.status(400).json({
+            return res.json({
                 error: "USER email does not exists"
             });
         }
 
         if (!user.autheticate(password)) {
-            return res.status(401).json({
+            return res.json({
                 error: "Email and password do not match"
             });
+        } else {
+            req.session.superadminID = user._id;
+            res.json({
+                msg: "Login successful",
+                login_status: true,
+                role: user.user_role,
+                id: user.user_id
+            })
         }
 
-        //create token
-        const token = jwt.sign({ _id: user._id }, process.env.SECRET);
-        //put token in cookie
-        res.cookie("token", token, { expire: new Date() + 9999 });
 
-        //send response to front end
-        const { _id, user_name, user_email, user_role, temp_id } = user;
-        return res.json({ token, user: { _id, user_name, user_email, user_role, temp_id } });
+
     });
 }
 
-exports.getaSuperAdmin = (req, res, next) => {
+// TODO: Logout 
+exports.superAdminLogout = (req, res) => {
+    Pig.box("SuperAdmin - LOGOUT");
+    if (req.session) {
+        req.session.cookie.expires = new Date().getTime();
+        req.session.destroy(function(err) {
+            if (err)
+                console.log(err)
+            console.log("Session cleared")
+        })
+
+    }
+}
+
+
+
+exports.superAdminRouteCheck = (req, res) => {
     Pig.box("Get Super User");
-    // 1. Get id from req.body
+    // 1. Get id from sessionID is any
     // 2. Find the super admin
     // 3. Return TRUE if exist or FALSE
-    const { TOKEN } = req.body;
+
     try {
-        const decode_token = jwt.verify(TOKEN, process.env.SECRET);
-        // console.log("decode_token - ", decode_token)
-        SuperAdminProfile.findById({ _id: decode_token._id }, (err, user) => {
-            if (err || !user) {
-                return res.json({
-                    status: false
-                })
-            } else {
-                return res.json({
-                    status: true
-                })
-            }
-        });
+        const sessiom_id = req.session.superadminID;
+        console.log("AdminID from Session - ", req.sessionID)
+        if (!sessiom_id)
+            return res.json({
+                status: false
+            })
+        else {
+            SuperAdminProfile.findById({ _id: sessiom_id }, (err, user) => {
+                if (err || !user) {
+                    return res.json({
+                        status: false
+                    })
+                } else {
+                    return res.json({
+                        status: true,
+                        role: user.user_role
+                    })
+                }
+            });
+        }
     } catch (err) {
         return res.json({
             status: false
         })
     }
 
+    // console.log("decode_token - ", decode_token)
+
+
+
 
 
 }
-
-
-
 
 
 exports.createaSuperAdmin = (req, res, next) => {

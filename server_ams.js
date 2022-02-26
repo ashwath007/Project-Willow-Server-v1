@@ -2,7 +2,10 @@ require("dotenv").config();
 const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
+var https = require('https');
+var fs = require('fs');
 
+const session = require('express-session')
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
@@ -10,10 +13,23 @@ const Pig = require('pigcolor');
 
 const app = express();
 
+
+
+
+
+
 //Middlewares
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(cors());
+const corsConfig = {
+    origin: 'https://localhost:8080',
+    credentials: true,
+    methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"]
+};
+app.use(cors(corsConfig));
+
+
+
 
 
 // *? ------------------------------------------------
@@ -25,6 +41,8 @@ const routerCheckPointRoute = require('./auth/auth_routes');
 
 
 // *? ------------------------------------------------
+
+
 
 
 //DB Connection
@@ -39,19 +57,71 @@ mongoose
 
 
 
-// Port
+// Session Store Connection
+//Mongo DB Store configuraton for session storage
+const MongoDBStore = require('connect-mongodb-session')(session);
+const store = new MongoDBStore({
+    uri: `${process.env.DATABASE_D}`,
+    collection: 'session'
+});
+store.on('error', function(error) {
+    console.log(error);
+});
 
+let sessionOptions = {
+        key: 'SID',
+        secret: process.env.SECRET_SESSION,
+        cookie: {
+            expires: 1000 * 60 * 60 * 5, //5hr
+            httpOnly: true,
+            sameSite: false,
+            secure: true,
+        },
+        store: store,
+        resave: false,
+        saveUninitialized: false,
+        unset: 'destroy',
+        rolling: true
+    }
+    // app.set('trust proxy', 1) // trust first proxy
+app.use(session({
+    secret: 'secrey-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+    },
+    store: store
+}))
+
+
+
+
+// Port
 const Port = process.env.PORT || 8000;
+
+var privateKey = fs.readFileSync('./certificate/key.pem', 'utf8');
+var certificate = fs.readFileSync('./certificate/cert.pem', 'utf8');
+
 
 
 // ** Testing 
 
-app.get("/", (req, res) => {
-    console.log("GET Requests")
-    res.json({
-        msg: "Willow MVP 1.0.0"
-    })
+app.get("/", function(req, res) {
+    req.session.viewCount++;
+    console.log("Session ID - ", req.sessionID)
+    req.session.usermode = "Dark";
+    req.session.usersettings = "Incomplete";
+    res.send(`<h3>Here is the count ${req.session.viewCount}</h3>`)
 });
+
+
+
+
+
+
 
 
 // ?? ---------------------------------------------
@@ -64,7 +134,29 @@ app.use('/api/web', routerCheckPointRoute);
 
 // ?? ---------------------------------------------
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Starting a port here
-app.listen(Port, () => {
+// app.listen(Port, () => {
+//     Pig.server(Port);
+// });
+var options = { key: privateKey, cert: certificate };
+var server = https.createServer(options, app);
+
+server.listen(Port, () => {
     Pig.server(Port);
 });
