@@ -2,58 +2,75 @@ const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 
-const adminProfileSchema = new mongoose.Schema({
-    admin_status: {
-        type: String,
-        enum: ['Online', 'Offline', 'Away'],
-        required: true,
-        default: 'Offline'
-    },
-    admin_id: {
+
+const clientsSchema = new mongoose.Schema({
+    client_id: {
         type: String,
         required: true,
         unique: true
     },
-    admin_role: {
+    client_role: {
         type: Number,
         required: true,
         trim: true
-    },
-    admin_region: {
-        type: String,
-        required: true
     },
     temp_id: {
         type: String,
         required: true,
         unique: true
     },
-    admin_name: {
+    client_name: {
         type: String,
         required: true,
         maxlength: 42
     },
-    admin_description: {
+    client_description: {
         type: String,
         required: true
     },
-    admin_email: {
+    client_email: {
         type: String,
         unique: true,
         required: true
     },
+    client_status: {
+        type: String,
+        enum: ['Online', 'Offline', 'Away'],
+        required: true,
+        default: 'Offline'
+    },
+    client_company_name: {
+        type: String,
+        required: true
+    },
+    client_company_size: {
+        type: String,
+        required: true
+    },
+    client_company_type: {
+        type: String,
+        required: true
+    },
+
+    //  ** ---
+    client_company: {
+        type: Object
+    },
+    // ** ---
+
+    client_division: {
+        type: [Object]
+    },
+
+    client_billing: {
+        type: [Object]
+    },
+
     encry_password: {
         type: String
     },
     salt: String,
 
-    employees: {
-        type: [Object]
-    },
-
-    clients: {
-        type: [Object]
-    },
 
     stats: {
         type: [Object]
@@ -69,11 +86,9 @@ const adminProfileSchema = new mongoose.Schema({
 
 
 
-});
+}, { timestamps: true });
 
-
-
-adminProfileSchema
+clientsSchema
     .virtual("password")
     .set(function(password) {
         this._password = password;
@@ -84,7 +99,7 @@ adminProfileSchema
         return this._password;
     });
 
-adminProfileSchema.methods = {
+clientsSchema.methods = {
     autheticate: function(plainpassword) {
         return this.securePassword(plainpassword) === this.encry_password;
     },
@@ -103,4 +118,4 @@ adminProfileSchema.methods = {
 };
 
 
-module.exports = mongoose.model("AdminProfile", adminProfileSchema);
+module.exports = mongoose.model("ClientProfile", clientsSchema);

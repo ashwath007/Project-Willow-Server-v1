@@ -8,6 +8,9 @@ var expressJwt = require("express-jwt");
 const { isError } = require('util');
 
 
+
+// ** All Login and Logout -> Super, Admin, Employees, Clients
+
 exports.superAdminLogin = (req, res) => {
     Pig.box("SuperAdmin - LOGIN");
     console.log(req.body)
@@ -15,11 +18,11 @@ exports.superAdminLogin = (req, res) => {
     const password = req.body.password;
     const errors = validationResult(req);
     if (!req.body.password || req.body.password === '') {
-        return res.status(422).json({
+        console.log("Here")
+        return res.json({
             error: "Please enter the password"
         });
-    }
-    if (!errors.isEmpty()) {
+    } else if (!errors.isEmpty()) {
         return res.status(422).json({
             error: errors.array()[0].msg
         });
@@ -51,18 +54,31 @@ exports.superAdminLogin = (req, res) => {
     });
 }
 
+exports.adminLogin = () => {
+    Pig.box("Admin - LOGIN");
+
+}
+
 // TODO: Logout 
 exports.superAdminLogout = (req, res) => {
     Pig.box("SuperAdmin - LOGOUT");
+    console.log(req.sessionID)
     if (req.session) {
         req.session.cookie.expires = new Date().getTime();
         req.session.destroy(function(err) {
             if (err)
                 console.log(err)
-            console.log("Session cleared")
+
+            return res.json({
+                msg: "Logout Success"
+            })
         })
 
     }
+}
+
+exports.adminLogout = () => {
+    Pig.box("Admin - LOGOUT");
 }
 
 
