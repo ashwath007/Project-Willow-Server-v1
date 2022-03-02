@@ -11,6 +11,24 @@ const { isError } = require('util');
 
 // ** All Login and Logout -> Super, Admin, Employees, Clients
 
+
+// ? Main Auth Checkpoints Here ---------------
+
+exports.isSignIn = (req, res, next) => {
+    if (req.sessionID) {
+        next();
+    }
+}
+
+// ? ------------------------------------------
+
+
+
+
+
+
+
+
 exports.superAdminLogin = (req, res) => {
     Pig.box("SuperAdmin - LOGIN");
     console.log(req.body)

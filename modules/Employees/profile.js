@@ -3,13 +3,13 @@ const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 
 
-const superAdminProfileSchema = new mongoose.Schema({
-    user_id: {
+const employeeSchema = new mongoose.Schema({
+    employee_id: {
         type: String,
         required: true,
         unique: true
     },
-    user_role: {
+    employee_role: {
         type: Number,
         required: true,
         trim: true
@@ -19,36 +19,47 @@ const superAdminProfileSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    user_name: {
+    employee_name: {
         type: String,
         required: true,
         maxlength: 42
     },
-    user_description: {
+    employee_description: {
         type: String,
         required: true
     },
-    user_email: {
+    employee_email: {
         type: String,
         unique: true,
         required: true
     },
+    employee_status: {
+        type: String,
+        enum: ['Online', 'Offline', 'Away'],
+        required: true,
+        default: 'Offline'
+    },
+
+    employement_type: {
+        type: String,
+        enum: ['Full Time', 'Part Time', 'Remote'],
+        required: true,
+        default: 'Full Time'
+    },
+
+    employee_division: {
+        type: [Object]
+    },
+
+    employee_salary: {
+        type: [Object]
+    },
+
     encry_password: {
         type: String
     },
     salt: String,
 
-    admins: {
-        type: [Object]
-    },
-
-    clients: {
-        type: [Object]
-    },
-
-    employees: {
-        type: [Object]
-    },
 
     stats: {
         type: [Object]
@@ -62,11 +73,18 @@ const superAdminProfileSchema = new mongoose.Schema({
         type: [Object]
     },
 
+    client_assigned: {
+        type: [Object]
+    },
+
+    work: {
+        type: [Object]
+    }
 
 
 }, { timestamps: true });
 
-superAdminProfileSchema
+employeeSchema
     .virtual("password")
     .set(function(password) {
         this._password = password;
@@ -77,7 +95,7 @@ superAdminProfileSchema
         return this._password;
     });
 
-superAdminProfileSchema.methods = {
+employeeSchema.methods = {
     autheticate: function(plainpassword) {
         return this.securePassword(plainpassword) === this.encry_password;
     },
@@ -96,4 +114,4 @@ superAdminProfileSchema.methods = {
 };
 
 
-module.exports = mongoose.model("SuperAdminProfile", superAdminProfileSchema);
+module.exports = mongoose.model("EmployeeProfile", employeeSchema);

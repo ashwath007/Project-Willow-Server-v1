@@ -1,6 +1,6 @@
 const express = require('express');
+const { getSuperAdminStats } = require('../../controllers/Stats/stats');
 const router = express.Router();
-const SuperAdminProfile = require('../../modules/SuperAdmin/profile');
 
 /* ** Get all Stats 
 
@@ -10,19 +10,7 @@ const SuperAdminProfile = require('../../modules/SuperAdmin/profile');
 
 */
 
-
-exports.getSuperAdminStats = (req, res) => {
-    SuperAdminProfile.find({}, 'admins clients approvals', (err, stats) => {
-        if (err) {
-            return res.json({
-                error: err
-            })
-        }
-        return res.json({
-            stats: stats
-        })
-    });
-}
+router.get('/route/get/all/stats', getSuperAdminStats);
 
 
 
