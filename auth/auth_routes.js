@@ -1,6 +1,6 @@
 const express = require('express');
 const { check, validationResult } = require("express-validator");
-const { superAdminRouteCheck, sendTokenSuperAdmin, superAdminLogin, createaSuperAdmin, superAdminLogout } = require('./auth_controllers');
+const { superAdminRouteCheck, sendTokenSuperAdmin, superAdminLogin, createaSuperAdmin, superAdminLogout, adminRouteCheck } = require('./auth_controllers');
 const router = express.Router();
 
 // Private Router Checkpoints
@@ -20,7 +20,7 @@ router.post('/route/login/admin', [
 
     check("password", "password field is required").isLength({ min: 0 })
 ], superAdminLogin);
-router.get('/route/check/admin', superAdminRouteCheck);
+router.get('/route/check/admin', adminRouteCheck);
 
 
 module.exports = router;
