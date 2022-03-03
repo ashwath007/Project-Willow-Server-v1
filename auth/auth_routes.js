@@ -14,4 +14,13 @@ router.post('/route/logout/superadmin', superAdminLogout);
 router.get('/route/check/superadmin', superAdminRouteCheck);
 router.post('/route/create/superadmin', createaSuperAdmin);
 
+
+// 2. Admin User Checkpoint
+router.post('/route/login/admin', [
+
+    check("password", "password field is required").isLength({ min: 0 })
+], superAdminLogin);
+router.get('/route/check/admin', superAdminRouteCheck);
+
+
 module.exports = router;

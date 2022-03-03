@@ -109,10 +109,48 @@ exports.getAllCompanies = (req, res) => {
 
 }
 
+exports.getAllSisterCompaniesADivisions = (req, res) => {
+    Pig.box("Division - GET ALL");
+    console.log("Client id - ", req.body.company_id)
+    ClientProfile.findOne({ client_id: req.body.company_id }, (err, client) => {
+        if (err) {
+            return res.status(500).json({
+                error: err
+            })
+        }
+        console.log("Client Division - ", client)
+        CompanyProfile.findById({ _id: client.client_division[0] }, (err, company) => {
+            // console.log('company', company)
+            if (err) {
+                return res.status(500).json({
+                    error: err
+                })
+            }
+            SisterCompanyProfile.find().where('_id').in(company.company_sister_company_division).exec((err, sistercompany) => {
+                // console.log('sistercompany', sistercompany)
+
+                if (err) {
+                    return res.status(500).json({
+                        error: err
+                    })
+                }
+                // console.log(sistercompany)
+                return res.json({
+                    sistercompany
+                })
+            })
+        })
+    })
+
+
+
+}
+
 exports.getAllSisterCompanies = (req, res) => {
     Pig.box("Sister Company / Division - GET ALL");
     console.log(req.body.company_id)
     CompanyProfile.findOne({ company_id: req.body.company_id }, (err, company) => {
+        console.log(err)
         if (err) {
             return res.status(500).json({
                 error: err
