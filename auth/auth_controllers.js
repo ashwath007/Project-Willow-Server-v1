@@ -143,6 +143,19 @@ exports.superAdminLogout = (req, res) => {
 
 exports.adminLogout = () => {
     Pig.box("Admin - LOGOUT");
+    console.log(req.sessionID)
+    if (req.session) {
+        req.session.cookie.expires = new Date().getTime();
+        req.session.destroy(function(err) {
+            if (err)
+                console.log(err)
+
+            return res.json({
+                msg: "Logout Success"
+            })
+        })
+
+    }
 }
 
 
