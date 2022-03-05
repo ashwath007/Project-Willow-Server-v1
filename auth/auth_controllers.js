@@ -87,7 +87,7 @@ exports.superAdminLogin = async(req, res) => {
 
         });
     } else if (check_admin) {
-        AdminProfile.findOne({ user_email: user_email }, (err, user) => {
+        AdminProfile.findOne({ admin_email: user_email }, (err, user) => {
             if (err || !user) {
                 return res.json({
                     error: "USER email does not exists"
