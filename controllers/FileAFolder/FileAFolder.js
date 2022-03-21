@@ -14,7 +14,7 @@ exports.createFolder = (req, res) => {
         newFileandFolder.folderunder.push(req.body.folderUnder)
     }
     newFileandFolder.save((err, created) => {
-        console.log(err)
+        console.log(err, created)
         if (err) {
             return res.status(402).json({
                 error: err
@@ -24,4 +24,19 @@ exports.createFolder = (req, res) => {
             created
         })
     });
+}
+
+exports.getAllFolderData = (req, res) => {
+    Pig.box("GET ALL Folder");
+    FileandFolder.find({ folderparent: req.body.sisId }, (err, allFolder) => {
+        if (err) {
+            return res.status(402).json({
+                error: err
+            })
+        }
+        console.log(allFolder)
+        return res.json({
+            allFolder
+        })
+    })
 }

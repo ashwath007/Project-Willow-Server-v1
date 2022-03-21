@@ -20,7 +20,7 @@ const FileandFolder = new mongoose.Schema({
         required: true
     },
     folderparent: {
-        type: [Object]
+        type: String
     },
     folderunder: {
         type: [Object]
