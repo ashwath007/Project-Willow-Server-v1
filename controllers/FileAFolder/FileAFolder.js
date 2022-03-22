@@ -40,3 +40,25 @@ exports.getAllFolderData = (req, res) => {
         })
     })
 }
+
+exports.uploadFile = (req, res) => {
+    Pig.box('UPLOAD File');
+    const newFileandDFolder = new FileandFolder();
+    newFileandDFolder.name = req.body.name;
+    newFileandDFolder.fileorfolder = 'File';
+    newFileandDFolder.filefolder_url = req.body.filefolder_url;
+    newFileandDFolder.filefolder_privacy = 'Public';
+    newFileandDFolder.folderparent = req.body.folderparent;
+    newFileandDFolder.save((err, uploaded) => {
+        if (err) {
+            return res.status(402).json({
+                error: err
+            })
+        }
+        return res.json({
+            uploaded
+        })
+    })
+
+
+}
