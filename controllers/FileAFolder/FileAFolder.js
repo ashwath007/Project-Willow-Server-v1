@@ -64,3 +64,17 @@ exports.uploadFile = (req, res) => {
 
 
 }
+
+exports.getAFile = (req, res) => {
+    Pig.box("GET A File");
+    FileandFolder.findById({ _id: req.params.fileID }, (err, file) => {
+        if (err) {
+            return res.status(402).json({
+                error: err
+            })
+        }
+        return res.json({
+            file
+        })
+    })
+}
