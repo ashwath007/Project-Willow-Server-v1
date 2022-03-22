@@ -44,12 +44,14 @@ exports.getAllFolderData = (req, res) => {
 exports.uploadFile = (req, res) => {
     Pig.box('UPLOAD File');
     const newFileandDFolder = new FileandFolder();
-    newFileandDFolder.name = req.body.name;
+    newFileandDFolder.name = req.body.folderName;
     newFileandDFolder.fileorfolder = 'File';
     newFileandDFolder.filefolder_url = req.body.filefolder_url;
     newFileandDFolder.filefolder_privacy = 'Public';
     newFileandDFolder.folderparent = req.body.folderparent;
+    newFileandDFolder.fileType = req.body.fileType;
     newFileandDFolder.save((err, uploaded) => {
+        console.log(err)
         if (err) {
             return res.status(402).json({
                 error: err

@@ -24,6 +24,9 @@ const FileandFolder = new mongoose.Schema({
     },
     folderunder: {
         type: [Object]
+    },
+    fileType: {
+        type: String
     }
 }, { timestamps: true });
 
