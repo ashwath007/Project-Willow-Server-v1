@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const FileandFolder = new mongoose.Schema({
     name: {
         type: String,
-        unique: true,
         required: true,
         maxlength: 32,
         minlength: 2
@@ -27,6 +26,12 @@ const FileandFolder = new mongoose.Schema({
     },
     fileType: {
         type: String
+    },
+    fileorfolder_lock: {
+        type: String,
+        required: true,
+        enum: ['LOCK', 'UNLOCK'],
+        default: 'UNLOCK'
     }
 }, { timestamps: true });
 

@@ -78,3 +78,35 @@ exports.getAFile = (req, res) => {
         })
     })
 }
+
+exports.getFoldersFilesUnder = (req, res) => {
+    Pig.box("GET FILES/FOLDERS Under Folder");
+    FileandFolder.findById({ _id: req.params.findID }, (err, folder_ids) => {
+
+    });
+}
+
+
+exports.workcreateFolder = (req, res) => {
+    Pig.box("CREATE Folder");
+    const newFileandFolder = new FileandFolder();
+    newFileandFolder.name = req.body.folderName;
+    newFileandFolder.filefolder_url = req.body.filefolder_url;
+    newFileandFolder.fileorfolder = req.body.fileorfolder;
+    newFileandFolder.filefolder_privacy = req.body.folderPrivacy;
+    newFileandFolder.folderparent = req.body.folderparent;
+    if (req.body.folderUnder) {
+        newFileandFolder.folderunder.push(req.body.folderUnder)
+    }
+    newFileandFolder.save((err, created) => {
+        console.log(err, created)
+        if (err) {
+            return res.status(402).json({
+                error: err
+            })
+        }
+        return res.json({
+            created
+        })
+    });
+}
