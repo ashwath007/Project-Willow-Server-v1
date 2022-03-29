@@ -39,6 +39,11 @@ const routerCheckPointRoute = require('./auth/auth_routes');
 
 // ** --------------------------------------------------------
 
+// ** ------------  All File and Folder Handelings --------------------
+const routerFolderFileRoute = require('./routes/FileAFolder/FileAFolder');
+
+// ** --------------------------------------------------------
+
 // ** ----------------- Super Admin --------------------
 const routerSuperAdminStats = require('./routes/Stats/index');
 
@@ -150,6 +155,12 @@ app.get("/", function(req, res) {
 
 // ** ------------ All Router Checkpoints --------------------
 app.use('/api/web', routerCheckPointRoute);
+
+// ** --------------------------------------------------------
+
+// ** ------------  All File and Folder Handelings --------------------
+
+app.use('/api/web', routerFolderFileRoute);
 
 // ** --------------------------------------------------------
 

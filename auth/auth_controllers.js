@@ -1,4 +1,5 @@
 const SuperAdminProfile = require('../modules/SuperAdmin/profile');
+const AdminProfile = require('../modules/Admin/profile');
 const Pig = require('pigcolor');
 const { check, validationResult } = require("express-validator");
 const { v4: uuidv4 } = require('uuid');
@@ -6,6 +7,7 @@ const crypto = require('crypto');
 var jwt = require("jsonwebtoken");
 var expressJwt = require("express-jwt");
 const { isError } = require('util');
+const res = require('express/lib/response');
 
 
 
@@ -23,13 +25,23 @@ exports.isSignIn = (req, res, next) => {
 // ? ------------------------------------------
 
 
+async function check_if_superadmin(user_email) {
+    const db_status = await SuperAdminProfile.findOne({ user_email: user_email });
+    if (db_status)
+        return true
+    else
+        return false
 
+}
+async function check_if_admin(user_email) {
+    const db_status = await AdminProfile.findOne({ admin_email: user_email });
+    if (db_status)
+        return true
+    else
+        return false
 
-
-
-
-
-exports.superAdminLogin = (req, res) => {
+}
+exports.superAdminLogin = async(req, res) => {
     Pig.box("SuperAdmin - LOGIN");
     console.log(req.body)
     const user_email = req.body.email;
@@ -46,30 +58,64 @@ exports.superAdminLogin = (req, res) => {
         });
     }
 
-    SuperAdminProfile.findOne({ user_email: user_email }, (err, user) => {
-        if (err || !user) {
-            return res.json({
-                error: "USER email does not exists"
-            });
-        }
+    const check_superadmin = await check_if_superadmin(user_email);
+    const check_admin = await check_if_admin(user_email);
+    // console.log("Login Status", check_superadmin, check_admin)
+    if (check_superadmin) {
+        SuperAdminProfile.findOne({ user_email: user_email }, (err, user) => {
+            if (err || !user) {
+                return res.json({
+                    error: "USER email does not exists"
+                });
+            }
 
-        if (!user.autheticate(password)) {
-            return res.json({
-                error: "Email and password do not match"
-            });
-        } else {
-            req.session.superadminID = user._id;
-            res.json({
-                msg: "Login successful",
-                login_status: true,
-                role: user.user_role,
-                id: user.user_id
-            })
-        }
+            if (!user.autheticate(password)) {
+                return res.json({
+                    error: "Email and password do not match"
+                });
+            } else {
+                req.session.superadminID = user._id;
+                res.json({
+                    msg: "Login successful",
+                    login_status: true,
+                    role: user.user_role,
+                    id: user.user_id
+                })
+            }
 
 
 
-    });
+        });
+    } else if (check_admin) {
+        AdminProfile.findOne({ admin_email: user_email }, (err, user) => {
+            if (err || !user) {
+                return res.json({
+                    error: "USER email does not exists"
+                });
+            }
+
+            if (!user.autheticate(password)) {
+                return res.json({
+                    error: "Email and password do not match"
+                });
+            } else {
+                req.session.adminID = user._id;
+                res.json({
+                    msg: "Login successful",
+                    login_status: true,
+                    role: user.admin_role,
+                    id: user.admin_id
+                })
+            }
+
+
+
+        });
+    }
+
+
+
+
 }
 
 exports.adminLogin = () => {
@@ -97,6 +143,19 @@ exports.superAdminLogout = (req, res) => {
 
 exports.adminLogout = () => {
     Pig.box("Admin - LOGOUT");
+    console.log(req.sessionID)
+    if (req.session) {
+        req.session.cookie.expires = new Date().getTime();
+        req.session.destroy(function(err) {
+            if (err)
+                console.log(err)
+
+            return res.json({
+                msg: "Logout Success"
+            })
+        })
+
+    }
 }
 
 
@@ -124,6 +183,47 @@ exports.superAdminRouteCheck = (req, res) => {
                     return res.json({
                         status: true,
                         role: user.user_role
+                    })
+                }
+            });
+        }
+    } catch (err) {
+        return res.json({
+            status: false
+        })
+    }
+
+    // console.log("decode_token - ", decode_token)
+
+
+
+
+
+}
+
+exports.adminRouteCheck = (req, res) => {
+    Pig.box("Get Admin User");
+    // 1. Get id from sessionID is any
+    // 2. Find the super admin
+    // 3. Return TRUE if exist or FALSE
+
+    try {
+        const sessiom_id = req.session.adminID;
+        console.log("AdminID from Session - ", req.sessionID)
+        if (!sessiom_id)
+            return res.json({
+                status: false
+            })
+        else {
+            AdminProfile.findById({ _id: sessiom_id }, (err, user) => {
+                if (err || !user) {
+                    return res.json({
+                        status: false
+                    })
+                } else {
+                    return res.json({
+                        status: true,
+                        role: user.admin_role
                     })
                 }
             });
